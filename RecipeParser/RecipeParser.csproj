@@ -197,6 +197,7 @@
     <Content Include="fonts\glyphicons-halflings-regular.eot" />
     <Content Include="Metadata\deploymentTemplates\apiappconfig.azureresource.json" />
     <Content Include="apiapp.json" />
+    <None Include="Properties\PublishProfiles\RecipeParser20161215 - Web Deploy.pubxml" />
     <None Include="Scripts\jquery-1.10.2.intellisense.js" />
     <Content Include="Scripts\bootstrap.js" />
     <Content Include="Scripts\bootstrap.min.js" />
@@ -267,6 +268,7 @@
     </Compile>
     <Compile Include="Clustering\KMeansClustering.cs" />
     <Compile Include="Models\IdentityModels.cs" />
+    <Compile Include="OCR.Space\OCRNuanceMain.cs" />
     <Compile Include="OCR.Space\OCRSpaceMain.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RecipeHTMLConverter.cs" />

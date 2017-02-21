@@ -1,14 +1,9 @@
 ﻿using RecipeParser.RecipeJsonModel;
-using RecipeParser.Util;
 using System;
-using System.Collections.Generic;
-using System.Collections.Specialized;
 using System.IO;
 using System.Net;
 using System.Net.Http;
-using System.Text;
 using System.Threading.Tasks;
-using System.Web;
 using System.Web.Http;
 using System.Web.Script.Serialization;
 
@@ -18,13 +13,6 @@ namespace RecipeParser.Controllers
     {
         private const string MATLISTAN_API_URI_STRING = "http://api.test.matlistan.se/Recipes/Parse";
 
-        [Route("api/recipe/{name}")]
-        [HttpGet]
-        public String Test(String name)
-        {
-            return "Hello " + (name == null? "World": name);
-        }
-
         [Route("api/recipe/raw")]
         [HttpPost]
         public Recipe ParseImage()
@@ -32,7 +20,7 @@ namespace RecipeParser.Controllers
             byte[] image = Request.Content.ReadAsByteArrayAsync().Result;
             if (image == null)
                 image = File.ReadAllBytes(@"C:\test\new\IMG_0030.jpg");
-            OCR.Space.OCRSpaceMain ocrSpace = new OCR.Space.OCRSpaceMain();
+            OCR.OCRSpaceMain ocrSpace = new OCR.OCRSpaceMain();
             string jsonObject = ocrSpace.ProcessPicture(image, "TestImageName.jpg");
 
             JavaScriptSerializer serializer = new JavaScriptSerializer();
@@ -55,7 +43,7 @@ namespace RecipeParser.Controllers
 
             if (image == null)
                 image = File.ReadAllBytes(@"C:\test\new\IMG_0030.jpg");
-            OCR.Space.OCRSpaceMain ocrSpace = new OCR.Space.OCRSpaceMain();
+            OCR.OCRSpaceMain ocrSpace = new OCR.OCRSpaceMain();
             string jsonObject = ocrSpace.ProcessPicture(image, "TestImageName.jpg");
             JavaScriptSerializer serializer = new JavaScriptSerializer();
             Recipe recipe = serializer.Deserialize<Recipe>(jsonObject);
@@ -71,28 +59,14 @@ namespace RecipeParser.Controllers
             JavaScriptSerializer serializer = new JavaScriptSerializer();
             Recipe recipe = serializer.Deserialize<Recipe>(jsonRequest);
 
-            if (recipe.OCRExitCode != 1) return null;
-
-            TextOverlay overlay = recipe.ParsedResults[0].TextOverlay;
-            overlay.ComputeExtraFields();
+            if (recipe.OCRExitCode != 1) return recipe.ErrorMessage;
 
             string htmlOutput = RecipeHTMLConverter.ConvertRecipeToHTML(recipe);
-            
-            string jsonOutput = ProcessRecipe(htmlOutput);
 
-            return jsonOutput;
+            return ProcessRecipe(htmlOutput);
         }
 
-        [Route("api/recipe/test")]
-        [HttpPost]
-        public string Test()
-        {
-            //var result = await Request.Content.ReadAsMultipartAsync();
-            string test = "\"Hello World!\"";
-            return test;
-        }
-
-        public string ProcessRecipe(string htmlPage)
+        private string ProcessRecipe(string htmlPage)
         {
             using (var client = new WebClient())
             {

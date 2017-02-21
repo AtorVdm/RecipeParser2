@@ -13,19 +13,14 @@ namespace RecipeParser
     {
         private Encoding swedishEncoding = Encoding.GetEncoding(1252);
         
-        private OCR.Space.OCRSpaceMain ocrSpace = new OCR.Space.OCRSpaceMain();
+        private OCR.OCRSpaceMain ocrSpace = new OCR.OCRSpaceMain();
         //private OCR.Abbyy.OCRAbbyyMain ocrAbbyy = new OCR.Abbyy.OCRAbbyyMain();
+        private OCR.OCRNuanceMain ocrNuance = new OCR.OCRNuanceMain();
 
         private string fileName;
+        
 
-        public Recipe ProcessAbbyyXML(XElement xdoc, string path)
-        {
-            fileName = path;
-            return null;
-            //return ocrAbbyy.ProcessAbbyyXML(xdoc, path);
-        }
-
-        public void ProcessUploadedFile(HttpPostedFile file)
+        public string ProcessUploadedFile(HttpPostedFile file)
         {
             fileName = String.Format(@"C:\test\{0}_{1}", file.FileName, DateTime.Now.ToString("MM-dd-hh-mm-ss"));
 
@@ -40,18 +35,18 @@ namespace RecipeParser
             JavaScriptSerializer serializer = new JavaScriptSerializer();
             Recipe recipe = serializer.Deserialize<Recipe>(jsonObject);
 
-            if (recipe.OCRExitCode != 1) return;
+            if (recipe.OCRExitCode != 1) return recipe.ErrorMessage;
 
             TextOverlay overlay = recipe.ParsedResults[0].TextOverlay;
             overlay.ComputeExtraFields();
-            
-            //string[] lines = recipe.ParsedResults[0].ParsedText.Split(new string[] { "\r\n" }, StringSplitOptions.None);
 
             string htmlOutput = RecipeHTMLConverter.ConvertRecipeToHTML(recipe);
 
             File.WriteAllText(fileName + ".html", htmlOutput, swedishEncoding);
 
             GenerateAreasPicture(recipe.ParsedResults[0].TextOverlay);
+
+            return htmlOutput;
         }
 
         public void GenerateAreasPicture(TextOverlay overlay)
